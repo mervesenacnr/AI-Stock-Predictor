@@ -1,13 +1,195 @@
-# AI Stock Predictor Financial Trend Forecasting Using LSTM and Interactive User Interface
-This study situates itself within the intersection of deep learning and financial time series analysis, focusing specifically on the application of Long Short-Term Memory (LSTM) networks to short-term stock price forecasting. The scope of the research includes the end-to-end development of a forecasting pipeline, encompassing data acquisition, preprocessing, model design, training, and evaluation.
-The dataset is derived from historical market data obtained via the Yahoo Finance API, selected to represent a diverse cross-section of stocks with varying volatility levels and sector dynamics. In order to assess the model’s forecasting ability, the study adopts a comparative evaluation framework, benchmarking the LSTM model against a simple feedforward neural network to isolate the benefits of temporal modeling.
-The implementation is carried out using Python, integrating libraries such as Keras for deep learning, and Tkinter and Plotly for the interactive interface. The analysis is guided by established evaluation metrics including Mean Absolute Error (MAE), Root Mean Square Error (RMSE), and R² which enable both quantitative and qualitative assessment of predictive performance. Through this methodological structure, the thesis aims to contribute a replicable and interpretable approach for AI-powered financial forecasting systems.
+# AI Stock Predictor
 
-## Graduation Project — LSTM Extension
+### Stock market time-series forecasting with a stacked LSTM and a Flask web interface
 
-An additional TensorFlow/Keras LSTM forecasting implementation
-is preserved in [`experiments/lstm-prototype`](experiments/lstm-prototype).
+**Computer Engineering Graduation Project · Üsküdar University · 2025**  · **Developer:** Merve Sena Çınar · [GitHub](https://github.com/mervesenacnr)
 
-This experimental version is separate from the repository's
-original technical-indicator and Random Forest implementation.
-Its evaluation limitations are documented in the experiment README.
+AI Stock Predictor is an educational machine-learning prototype for exploring **stock-price time series**, training a **Long Short-Term Memory (LSTM)** neural network on historical closing prices, and presenting a next-step price estimate in a browser-based interface. It connects data retrieval, preprocessing, sequence modeling, and visualization into a single Python/Flask workflow.
+
+> **Research prototype — not investment advice.** The current implementation has not established out-of-sample forecasting accuracy. Charts and numerical forecasts should not be interpreted as reliable investment signals.
+
+## Project at a glance
+
+| Component | Implementation |
+| --- | --- |
+| Research domain | Financial time-series analysis and one-step price forecasting |
+| Data source | Yahoo Finance through `yfinance` |
+| Model | Two-layer stacked LSTM, implemented with TensorFlow/Keras |
+| Input | Historical `Close` prices, with a 60-observation lookback window |
+| Architecture | `LSTM(50, return_sequences=True) → LSTM(50) → Dense(1)` |
+| Training settings | Adam optimizer, mean squared error (MSE) loss, 5 epochs, batch size 32 |
+| Preprocessing | `MinMaxScaler` from scikit-learn |
+| Backend | Python + Flask |
+| Visualization | Matplotlib image and Plotly-compatible JSON traces |
+| Outputs | Estimated next closing-price value and a historical/forecast chart |
+
+## Features
+
+- **Symbol selection:** request historical prices for a stock symbol accepted by Yahoo Finance (for example, `THYAO.IS`).
+- **Date-range input:** select the beginning and end of the requested historical interval.
+- **On-demand training:** construct 60-step sequences and train an LSTM from the retrieved data when a forecast is requested.
+- **Next-step forecast:** use the final 60 observed closing prices as the model input to estimate the following step.
+- **Visual explanation:** compare recent observed prices with the model's predicted extension using a static Matplotlib chart and Plotly-compatible series.
+- **Web access:** submit requests through a Flask-rendered HTML interface.
+
+The application needs an internet connection to retrieve market data. It does **not** ship with a trained model, a live trading engine, or verified forecasting-performance benchmarks.
+
+## System architecture
+
+GitHub renders the following Mermaid diagram directly in this README:
+
+```mermaid
+flowchart TD
+    A[User enters ticker and date range] --> B[Flask route: app.py]
+    B --> C[Yahoo Finance: yfinance]
+    C --> D[Historical closing prices]
+    D --> E[MinMax scaling]
+    E --> F[60-step rolling sequences]
+    F --> G[Two stacked LSTM layers: 50 units each]
+    G --> H[Dense output: one estimated close]
+    H --> I[Inverse scaling]
+    I --> J[Matplotlib chart and Plotly-compatible traces]
+    J --> K[Flask-rendered dashboard]
+```
+
+### LSTM network
+
+```text
+Historical close-price sequence
+       │
+       ▼
+Input: 60 observations × 1 feature
+       │
+       ▼
+LSTM layer: 50 units, return_sequences=True
+       │
+       ▼
+LSTM layer: 50 units
+       │
+       ▼
+Dense layer: 1 output
+       │
+       ▼
+Estimated next-step closing price
+```
+
+The LSTM is trained *at request time* with an MSE objective and Adam optimization. The next-step prediction is inverse-transformed back to the price scale for display.
+
+## Data and modeling workflow
+
+1. **Download historical observations.** `yf.download()` requests data for the selected ticker and date range. The model uses the `Close` column.
+2. **Validate basic availability.** Empty responses and histories shorter than 100 rows are rejected.
+3. **Normalize the price series.** `MinMaxScaler` transforms historical closing prices.
+4. **Prepare supervised windows.** Each training sample contains the preceding **60 observations** and targets the following closing price.
+5. **Train the model.** The two-layer Keras LSTM is fitted for **5 epochs**, with **batch size 32**.
+6. **Calculate an in-sample score.** The code reports `R²` over the training sequences. **This is not a held-out test score.**
+7. **Predict from the most recent window.** The final 60 observations are passed to the trained model to estimate the next step.
+8. **Render the result.** The backend returns a base64-encoded Matplotlib chart, an estimated value, and Plotly-compatible chart data to the HTML template.
+
+The present code adds one calendar day to the final recorded date for plotting; this is **not** a verified next-trading-session calendar. It also fits the scaler to the complete downloaded series, which is unsuitable for a leakage-free future evaluation.
+
+## Application preview
+
+The screenshots below were captured during a **real local run** of the Flask application. The first shows the stock-symbol and date-range form; the second shows the forecast result and interactive chart rendered for `THYAO.IS`.
+
+| Stock selection and date-range form | Example LSTM forecast result |
+| :---: | :---: |
+| ![Flask web form for stock symbol and date range](docs/assets/dashboard.png) | ![Real application result showing a THYAO.IS prediction and historical-price chart](docs/assets/forecast-example.png) |
+
+**Example shown:** `THYAO.IS` · displayed predicted closing price **₺281.60** · observed prices and the modeled next-step estimate are plotted separately. The displayed value documents one application run, **not** a validated forecast or a measure of predictive accuracy. Model output may vary between runs because training is stochastic.
+
+## Repository structure
+
+The structure below describes the **proposed single-version layout after promoting the LSTM application to the repository root**:
+
+```text
+AI-Stock-Predictor/
+├── app.py                  # Flask routes, request parameters, template rendering
+├── model.py                # Data preparation, LSTM training, forecast, charts
+├── templates/
+│   └── index.html          # User interface
+├── static/
+│   └── css/
+│       └── style.css       # Frontend styling
+├── requirements.txt        # Python package requirements
+├── docs/
+│   └── assets/
+│       ├── dashboard.png          # Real Flask input-form screenshot
+│       └── forecast-example.png   # Real example prediction chart
+├── .gitignore
+└── README.md
+```
+
+**Historical versions:** Earlier technical-indicator, Random Forest and notebook-based experiments remain accessible through Git history if removed from the current working tree. They are not the same implementation as the LSTM Flask application documented here.
+
+## Getting started
+
+### Prerequisites
+
+- **Python 3.10** was used for a successful local run; a reproducible, version-pinned environment has not yet been published.
+- `pip` and `venv`
+- Internet access for Yahoo Finance requests
+
+### Install
+
+```bash
+# Clone your repository
+git clone https://github.com/mervesenacnr/AI-Stock-Predictor.git
+cd AI-Stock-Predictor
+
+# Create an isolated environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install project dependencies
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### Run
+
+```bash
+python app.py
+```
+
+Visit **http://127.0.0.1:5000** and enter a supported ticker and a historical date range. An example input symbol is `THYAO.IS` (Borsa İstanbul); availability depends on Yahoo Finance.
+
+> The Flask input and chart-rendering workflow has been exercised locally with Python 3.10. The dependency list is still unpinned, and reproducibility on other machines has not been established. If you encounter an error with newer `yfinance` responses or TensorFlow versions, record and resolve it before claiming cross-platform compatibility.
+
+## Known limitations and research integrity
+
+| Limitation | Why it matters | Planned improvement |
+| --- | --- | --- |
+| Training-set `R²` | Does not measure generalization to future periods | Chronological train/validation/test split and held-out metrics |
+| Scaler fitted on all observations | Can cause information leakage in a proper backtest | Fit the scaler on training data only |
+| Re-training on every request | Higher latency and potentially varying results | Controlled training pipeline and reusable model artifacts |
+| No fixed randomness seeds | Experiments may not be reproducible | Set and record Python/NumPy/TensorFlow seeds |
+| Next calendar-day visualization | May point to a weekend or market holiday | Use exchange trading calendars |
+| No evaluated naive baseline | Cannot tell whether the network outperforms a simple forecast | Compare against last-value/persistence and other baselines |
+| Basic exception handling | Some data/API failures are collapsed into `None` | User-facing errors, detailed logs and tests |
+
+**Current performance claim:** None. The repository provides an LSTM implementation and a prototype interface, but no validated out-of-sample accuracy, financial returns or deployability claims.
+
+## Roadmap
+
+- [x] Demonstrate the end-to-end Flask workflow in a local Python 3.10 environment.
+- [ ] Pin and test dependencies on a fresh installation for reproducibility.
+- [ ] Add unit tests for inputs, data shape, sequence generation and forecasts.
+- [ ] Split data chronologically and eliminate preprocessing leakage.
+- [ ] Evaluate on held-out periods using MAE, RMSE and `R²` alongside a naive baseline.
+- [ ] Use trading-session dates for chart annotations.
+- [x] Save actual UI and prediction screenshots under `docs/assets/`.
+- [ ] Separate training from inference and benchmark inference latency.
+- [ ] Compare LSTM with simpler statistical and machine-learning approaches under identical evaluation conditions.
+
+## Academic background
+
+This project was developed as a **Computer Engineering graduation project at Üsküdar University (2025)**. Its objective is to study and implement financial time-series analysis and machine-learning-based forecasting in a user-facing application. The code and documentation are shared as a portfolio and learning resource, not as a peer-reviewed or production-validated forecasting system.
+
+## Author
+
+**Merve Sena Çınar** · Computer Engineer · [GitHub profile](https://github.com/mervesenacnr)
+
+---
+
+*Educational and research use only. Market prices are uncertain; this repository is not investment advice.*
