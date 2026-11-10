@@ -155,17 +155,3 @@ python app.py
 Visit **http://127.0.0.1:5000** and enter a supported ticker and a historical date range. An example input symbol is `THYAO.IS` (Borsa İstanbul); availability depends on Yahoo Finance.
 
 > The Flask input and chart-rendering workflow has been exercised locally with Python 3.10. The dependency list is still unpinned, and reproducibility on other machines has not been established. If you encounter an error with newer `yfinance` responses or TensorFlow versions, record and resolve it before claiming cross-platform compatibility.
-
-## Known limitations and research integrity
-
-| Limitation | Why it matters | Planned improvement |
-| --- | --- | --- |
-| Training-set `R²` | Does not measure generalization to future periods | Chronological train/validation/test split and held-out metrics |
-| Scaler fitted on all observations | Can cause information leakage in a proper backtest | Fit the scaler on training data only |
-| Re-training on every request | Higher latency and potentially varying results | Controlled training pipeline and reusable model artifacts |
-| No fixed randomness seeds | Experiments may not be reproducible | Set and record Python/NumPy/TensorFlow seeds |
-| Next calendar-day visualization | May point to a weekend or market holiday | Use exchange trading calendars |
-| No evaluated naive baseline | Cannot tell whether the network outperforms a simple forecast | Compare against last-value/persistence and other baselines |
-| Basic exception handling | Some data/API failures are collapsed into `None` | User-facing errors, detailed logs and tests |
-
-**Current performance claim:** None. The repository provides an LSTM implementation and a prototype interface, but no validated out-of-sample accuracy, financial returns or deployability claims
