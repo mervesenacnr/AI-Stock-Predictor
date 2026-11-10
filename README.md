@@ -2,3 +2,12 @@
 This study situates itself within the intersection of deep learning and financial time series analysis, focusing specifically on the application of Long Short-Term Memory (LSTM) networks to short-term stock price forecasting. The scope of the research includes the end-to-end development of a forecasting pipeline, encompassing data acquisition, preprocessing, model design, training, and evaluation.
 The dataset is derived from historical market data obtained via the Yahoo Finance API, selected to represent a diverse cross-section of stocks with varying volatility levels and sector dynamics. In order to assess the model’s forecasting ability, the study adopts a comparative evaluation framework, benchmarking the LSTM model against a simple feedforward neural network to isolate the benefits of temporal modeling.
 The implementation is carried out using Python, integrating libraries such as Keras for deep learning, and Tkinter and Plotly for the interactive interface. The analysis is guided by established evaluation metrics including Mean Absolute Error (MAE), Root Mean Square Error (RMSE), and R² which enable both quantitative and qualitative assessment of predictive performance. Through this methodological structure, the thesis aims to contribute a replicable and interpretable approach for AI-powered financial forecasting systems.
+
+## Graduation Project — LSTM Extension
+
+An additional TensorFlow/Keras LSTM forecasting implementation
+is preserved in [`experiments/lstm-prototype`](experiments/lstm-prototype).
+
+This experimental version is separate from the repository's
+original technical-indicator and Random Forest implementation.
+Its evaluation limitations are documented in the experiment README.
