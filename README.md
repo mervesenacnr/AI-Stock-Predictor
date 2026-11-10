@@ -6,7 +6,7 @@
 
 AI Stock Predictor is an educational machine-learning prototype for exploring **stock-price time series**, training a **Long Short-Term Memory (LSTM)** neural network on historical closing prices, and presenting a next-step price estimate in a browser-based interface. It connects data retrieval, preprocessing, sequence modeling, and visualization into a single Python/Flask workflow.
 
-> **Research prototype — not investment advice.** The current implementation has not established out-of-sample forecasting accuracy. Charts and numerical forecasts should not be interpreted as reliable investment signals.
+> **Research prototype - not investment advice.** The current implementation has not established out-of-sample forecasting accuracy. Charts and numerical forecasts should not be interpreted as reliable investment signals.
 
 ## Project at a glance
 
@@ -168,28 +168,4 @@ Visit **http://127.0.0.1:5000** and enter a supported ticker and a historical da
 | No evaluated naive baseline | Cannot tell whether the network outperforms a simple forecast | Compare against last-value/persistence and other baselines |
 | Basic exception handling | Some data/API failures are collapsed into `None` | User-facing errors, detailed logs and tests |
 
-**Current performance claim:** None. The repository provides an LSTM implementation and a prototype interface, but no validated out-of-sample accuracy, financial returns or deployability claims.
-
-## Roadmap
-
-- [x] Demonstrate the end-to-end Flask workflow in a local Python 3.10 environment.
-- [ ] Pin and test dependencies on a fresh installation for reproducibility.
-- [ ] Add unit tests for inputs, data shape, sequence generation and forecasts.
-- [ ] Split data chronologically and eliminate preprocessing leakage.
-- [ ] Evaluate on held-out periods using MAE, RMSE and `R²` alongside a naive baseline.
-- [ ] Use trading-session dates for chart annotations.
-- [x] Save actual UI and prediction screenshots under `docs/assets/`.
-- [ ] Separate training from inference and benchmark inference latency.
-- [ ] Compare LSTM with simpler statistical and machine-learning approaches under identical evaluation conditions.
-
-## Academic background
-
-This project was developed as a **Computer Engineering graduation project at Üsküdar University (2025)**. Its objective is to study and implement financial time-series analysis and machine-learning-based forecasting in a user-facing application. The code and documentation are shared as a portfolio and learning resource, not as a peer-reviewed or production-validated forecasting system.
-
-## Author
-
-**Merve Sena Çınar** · Computer Engineer · [GitHub profile](https://github.com/mervesenacnr)
-
----
-
-*Educational and research use only. Market prices are uncertain; this repository is not investment advice.*
+**Current performance claim:** None. The repository provides an LSTM implementation and a prototype interface, but no validated out-of-sample accuracy, financial returns or deployability claims
